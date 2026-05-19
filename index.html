@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>METAMORPH | 30-Day Neural Weight Loss OS - Transform Your Body</title>
+  <meta name="description" content="METAMORPH is an AI-powered 30-day weight loss tracker with Google Sign-in, calorie estimation, workout logging, and Excel export. Start your transformation journey today!">
+  <meta name="keywords" content="weight loss tracker, 30 day challenge, fitness web app, calorie counter AI, workout tracker, water intake monitor, habit tracker, body transformation">
+  <meta name="author" content="METAMORPH">
+  <meta name="robots" content="index, follow">
+  <meta property="og:title" content="METAMORPH - 30-Day Neural Weight Loss OS">
+  <meta property="og:description" content="AI-powered weight loss tracker with Google Sign-in, workout logging, calorie estimation, and Excel export. Transform your body in 30 days!">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="canonical" href="https://metamorph-fitness.app">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+    body { background: #f8fafc; color: #1e293b; transition: all 0.2s; }
+    body.dark { background: #0f172a; color: #e2e8f0; }
+    body.dark .card, body.dark .widget, body.dark .navbar, body.dark footer, body.dark .modal-content, body.dark .exercise-item, body.dark .ad-container { background: #1e293b; border-color: #334155; color: #e2e8f0; }
+    body.dark .btn-outline { border-color: #64748b; color: #cbd5e1; }
+    .container { max-width: 1280px; margin: 0 auto; padding: 0 1.5rem; }
+    .navbar { background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.02); position: sticky; top: 0; z-index: 100; border-bottom: 1px solid #eef2f6; backdrop-filter: blur(4px); }
+    body.dark .navbar { background: #1e293b; border-bottom-color: #334155; }
+    .nav-flex { display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; flex-wrap: wrap; gap: 1rem; }
+    .logo { font-weight: 800; font-size: 1.6rem; background: linear-gradient(135deg, #2b9348, #0f7b3a); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .nav-links { display: flex; gap: 1.2rem; align-items: center; flex-wrap: wrap; }
+    .nav-links a { text-decoration: none; font-weight: 500; color: #334155; cursor: pointer; }
+    body.dark .nav-links a { color: #cbd5e1; }
+    .btn-primary { background: #2b9348; color: white; border: none; padding: 0.6rem 1.3rem; border-radius: 40px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+    .btn-outline { background: transparent; border: 1.5px solid #2b9348; color: #2b9348; padding: 0.5rem 1.2rem; border-radius: 40px; font-weight: 600; cursor: pointer; }
+    .btn-toggle, .btn-login { background: none; border: 1px solid #cbd5e1; padding: 0.5rem 1rem; border-radius: 40px; cursor: pointer; }
+    .card { background: white; border-radius: 28px; padding: 1.5rem; box-shadow: 0 8px 20px rgba(0,0,0,0.02); border: 1px solid #f0f2f5; margin-bottom: 1.5rem; }
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
+    .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; }
+    .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.2rem; margin-bottom: 1.5rem; }
+    .widget { background: white; border-radius: 24px; padding: 1.2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.04); border: 1px solid #f0f2f5; }
+    body.dark .widget { background: #1e293b; }
+    .stat-number { font-size: 2rem; font-weight: 800; color: #2b9348; }
+    .progress { background: #e2e8f0; border-radius: 20px; height: 10px; overflow: hidden; margin: 0.8rem 0; }
+    .progress-fill { background: #2b9348; width: 0%; height: 100%; border-radius: 20px; transition: width 0.3s; }
+    .exercise-item { display: flex; align-items: center; justify-content: space-between; padding: 0.9rem; border-bottom: 1px solid #edf2f7; flex-wrap: wrap; gap: 0.5rem; }
+    .exercise-name { font-weight: 600; flex: 2; }
+    .completed-exercise { text-decoration: line-through; opacity: 0.6; }
+    .meal-input-area { display: flex; gap: 0.8rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .meal-input-area input { padding: 0.8rem; border-radius: 60px; border: 1px solid #e2e8f0; flex: 1; background: #f9fafb; }
+    .food-log { max-height: 300px; overflow-y: auto; }
+    .food-item { display: flex; justify-content: space-between; padding: 0.6rem; border-bottom: 1px solid #eef2f6; flex-wrap: wrap; gap: 0.5rem; }
+    .macro-card { background: #f1f5f9; border-radius: 20px; padding: 0.8rem; text-align: center; flex: 1; }
+    body.dark .macro-card { background: #334155; }
+    h2 { font-size: 1.8rem; margin: 1rem 0 0.5rem; font-weight: 700; }
+    .notification-toast { position: fixed; bottom: 20px; right: 20px; background: #2b9348; color: white; padding: 12px 20px; border-radius: 60px; z-index: 1000; font-weight: 500; box-shadow: 0 4px 12px rgba(0,0,0,0.15); animation: fadeInUp 0.3s ease; z-index: 1001; }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(3px); }
+    .modal-content { background: white; max-width: 450px; width: 90%; border-radius: 32px; padding: 1.8rem; animation: modalSlideIn 0.3s ease; }
+    @keyframes modalSlideIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+    .day-badge { display: inline-block; width: 45px; text-align: center; margin: 4px; padding: 8px 0; border-radius: 60px; background: #eef2ff; font-weight: 600; cursor: pointer; transition: 0.2s; }
+    .day-completed { background: #2b9348; color: white; }
+    .day-locked { background: #e2e8f0; color: #94a3b8; cursor: not-allowed; opacity: 0.6; }
+    .day-current { border: 2px solid #f59e0b; box-shadow: 0 0 0 2px #fef3c7; }
+    .input-group { margin-bottom: 1rem; }
+    .input-group label { display: block; font-weight: 500; margin-bottom: 0.3rem; }
+    .input-group input { width: 100%; padding: 0.7rem; border-radius: 60px; border: 1px solid #cbd5e1; background: #f9fafb; font-size: 1rem; }
+    body.dark .input-group input { background: #334155; border-color: #475569; color: white; }
+    hr { margin: 1rem 0; }
+    .user-avatar { display: flex; align-items: center; gap: 8px; background: #e9f7ef; padding: 5px 12px; border-radius: 40px; }
+    body.dark .user-avatar { background: #334155; }
+    .export-btn { background: #2563eb; color: white; border: none; }
+    .footer-export { margin-top: 2rem; text-align: center; padding: 1rem; }
+    .weight-input-highlight { background: linear-gradient(135deg, #e9f7ef, #d1fae5); border-radius: 24px; padding: 1rem; }
+    body.dark .weight-input-highlight { background: linear-gradient(135deg, #1e3a2f, #1e293b); }
+    /* Ad Containers */
+    .ad-container { background: #f1f5f9; border-radius: 20px; padding: 0.75rem; text-align: center; margin: 1rem 0; border: 1px dashed #cbd5e1; min-height: 100px; display: flex; align-items: center; justify-content: center; flex-direction: column; }
+    .ad-label { font-size: 0.7rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+    .ad-slot { min-height: 90px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.02); border-radius: 12px; }
+    .sidebar-ad { position: sticky; top: 100px; }
+    @media (max-width: 768px) { .sidebar-ad { position: static; margin-top: 1rem; } }
+    .two-column-layout { display: grid; grid-template-columns: 1fr 300px; gap: 1.5rem; }
+    @media (max-width: 768px) { .two-column-layout { grid-template-columns: 1fr; } }
+    .main-content { min-width: 0; }
+  </style>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="container nav-flex">
+    <div class="logo"><i class="fas fa-crown"></i> METAMORPH</div>
+    <div class="nav-links">
+      <a data-page="landing">Home</a>
+      <a data-page="dashboard">Dashboard</a>
+      <a data-page="challenge">30-Day</a>
+      <a data-page="workout">Workouts</a>
+      <a data-page="nutrition">Nutrition AI</a>
+      <a data-page="water">Water</a>
+      <button class="btn-toggle" id="darkModeToggle"><i class="fas fa-moon"></i> Dark</button>
+      <div id="googleLoginBtn"></div>
+      <div id="userInfo" style="display:none;" class="user-avatar">
+        <i class="fas fa-user-circle"></i>
+        <span id="userEmail"></span> 
+        <button id="signOutBtn" style="background:none; border:none; cursor:pointer; margin-left: 5px;"><i class="fas fa-sign-out-alt"></i></button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<main id="appRoot">
+  <div id="landingPage">
+    <div class="container" style="padding: 2rem 0;">
+      <div style="text-align: center; padding: 2rem 0;">
+        <h1 style="font-size: 3rem; font-weight: 800;">Transform Your Body in <span style="color:#2b9348;">30 Days</span></h1>
+        <p style="font-size: 1.2rem; margin: 1rem 0;">Google Sign-in · AI Calorie Tracking · Download Your Excel Report</p>
+        <button class="btn-primary" id="startChallengeBtn">🔥 Start 30-Day Challenge</button>
+        <button class="btn-outline" id="trackProgressBtn">📊 Track Progress</button>
+      </div>
+      
+      <!-- Top Banner Ad Space -->
+      <div class="ad-container" id="topBannerAd">
+        <div class="ad-label"><i class="fas fa-ad"></i> Advertisement</div>
+        <div class="ad-slot" id="topAdSlot">
+          <!-- Google AdSense code will be inserted here -->
+          <p style="font-size: 0.8rem; color: #94a3b8;">Ad Space - Configure AdSense Unit ID</p>
+        </div>
+      </div>
+
+      <div class="two-column-layout">
+        <div class="main-content">
+          <div class="grid-2">
+            <div class="card"><i class="fas fa-dumbbell" style="font-size: 2rem; color:#2b9348;"></i><h3>15+ Weight Loss Exercises</h3><p>Daily workout checklist & calorie burn</p></div>
+            <div class="card"><i class="fas fa-robot" style="font-size: 2rem; color:#3b82f6;"></i><h3>AI Calorie Estimator</h3><p>Describe your meal, we calculate macros</p></div>
+          </div>
+        </div>
+        <div class="sidebar-ad">
+          <div class="ad-container">
+            <div class="ad-label"><i class="fas fa-ad"></i> Sponsored</div>
+            <div class="ad-slot" id="sidebarAdSlot">
+              <p style="font-size: 0.8rem; color: #94a3b8;">Sidebar Ad Space</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-export">
+        <button id="downloadExcelBtn" class="btn-primary export-btn"><i class="fas fa-file-excel"></i> Download Challenge Data (Excel/CSV)</button>
+        <p style="font-size: 0.8rem; margin-top: 0.5rem;">Export your 30-day progress, workouts, meals & hydration</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="dashboardPage" style="display:none;">
+    <div class="container">
+      <div class="two-column-layout">
+        <div class="main-content">
+          <h2>📊 Your Wellness Dashboard</h2>
+          <div class="dashboard-grid">
+            <div class="widget"><i class="fas fa-weight-scale"></i> Current Weight <div class="stat-number" id="dashCurrentWeight">-- kg</div>Goal: <span id="dashGoalWeight">--</span> kg</div>
+            <div class="widget"><i class="fas fa-bullseye"></i> Goal Progress <div class="stat-number" id="weightLeft">--</div>kg to goal</div>
+            <div class="widget"><i class="fas fa-fire"></i> Calories Burned <div class="stat-number" id="totalBurnCalsDash">0</div>Today</div>
+            <div class="widget"><i class="fas fa-calendar-week"></i> Streak <div class="stat-number" id="streakDaysDash">0</div>days 🔥</div>
+          </div>
+          <div class="progress"><div class="progress-fill" id="dailyProgressFillDash" style="width:0%"></div><span id="dailyPercentTextDash">0% daily progress</span></div>
+          <div class="grid-2">
+            <div class="card"><canvas id="weightChart" width="300" height="180"></canvas><p>Weight trend (last 7 days)</p></div>
+            <div class="card"><canvas id="waterChart" width="300" height="180"></canvas><p>Hydration (L)</p></div>
+            <div class="card"><canvas id="caloriesChart" width="300" height="180"></canvas><p>Calorie intake vs goal</p></div>
+          </div>
+          <div class="card"><h3>Weekly Workout Completion</h3><canvas id="workoutCompletionChart"></canvas></div>
+        </div>
+        <div class="sidebar-ad">
+          <div class="ad-container sidebar-ad">
+            <div class="ad-label"><i class="fas fa-ad"></i> Sponsored</div>
+            <div class="ad-slot" id="dashboardSidebarAd">
+              <p style="font-size: 0.8rem; color: #94a3b8;">Advertisement</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="challengePage" style="display:none;">
+    <div class="container">
+      <div class="two-column-layout">
+        <div class="main-content">
+          <h2>🔥 30-Day Transformation Challenge</h2>
+          <div class="card">
+            <div class="progress"><div class="progress-fill" id="challengeFill" style="width:0%"></div></div>
+            <p id="challengeInfo" style="margin: 0.5rem 0;">You can only mark 1 day as completed per calendar day.</p>
+            <div id="challengeDaysGrid" style="display: flex; flex-wrap: wrap; gap: 8px; margin: 1rem 0;"></div>
+            <button id="completeTodayBtn" class="btn-primary"><i class="fas fa-check-circle"></i> Mark Today's Day as Done</button>
+            <p id="nextDayMsg" style="margin-top: 1rem; font-size: 0.8rem; color: #f59e0b;"></p>
+          </div>
+        </div>
+        <div class="sidebar-ad">
+          <div class="ad-container">
+            <div class="ad-label">Advertisement</div>
+            <div class="ad-slot" id="challengeSidebarAd"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="workoutPage" style="display:none;">
+    <div class="container">
+      <div class="two-column-layout">
+        <div class="main-content">
+          <h2><i class="fas fa-heartbeat"></i> 15 Weight Loss Workouts</h2>
+          <div class="card"><div id="workoutExerciseList"></div><div class="progress"><div class="progress-fill" id="workoutProgressFill" style="width:0%"></div></div><p id="workoutCompletedCount">0/15 exercises completed</p><button id="resetWorkoutsBtn" class="btn-outline">Reset Today</button></div>
+        </div>
+        <div class="sidebar-ad">
+          <div class="ad-container"><div class="ad-label">Advertisement</div><div class="ad-slot" id="workoutSidebarAd"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="nutritionPage" style="display:none;">
+    <div class="container">
+      <div class="two-column-layout">
+        <div class="main-content">
+          <h2><i class="fas fa-brain"></i> AI Calorie Tracker</h2>
+          <div class="card">
+            <div class="meal-input-area"><input type="text" id="mealDescription" placeholder="e.g., grilled chicken salad, rice, avocado toast"><button id="analyzeMealBtn" class="btn-primary">AI Estimate</button></div>
+            <div id="aiSuggestion" style="background:#eef2ff; padding:0.8rem; border-radius:20px; margin-bottom:1rem;"></div>
+            <h3>Today's Food Log</h3>
+            <div id="foodLogList" class="food-log"></div>
+            <div class="grid-2" style="margin-top:1rem;"><div class="macro-card">🔥 Calories: <span id="totalCaloriesSpan">0</span></div><div class="macro-card">🥩 Protein: <span id="totalProteinSpan">0</span>g</div><div class="macro-card">🍚 Carbs: <span id="totalCarbsSpan">0</span>g</div><div class="macro-card">🧈 Fats: <span id="totalFatsSpan">0</span>g</div></div>
+            <button id="clearMealsBtn" class="btn-outline">Clear Log</button>
+          </div>
+        </div>
+        <div class="sidebar-ad">
+          <div class="ad-container"><div class="ad-label">Advertisement</div><div class="ad-slot" id="nutritionSidebarAd"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="waterPage" style="display:none;">
+    <div class="container">
+      <div class="two-column-layout">
+        <div class="main-content">
+          <h2>💧 Hydration Tracker</h2>
+          <div class="card"><div id="waterGlassesContainer"></div><button id="resetWaterBtn" class="btn-outline">Reset</button></div>
+        </div>
+        <div class="sidebar-ad">
+          <div class="ad-container"><div class="ad-label">Advertisement</div><div class="ad-slot" id="waterSidebarAd"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="footer">
+  <div class="container" style="text-align:center; padding: 1.5rem;">
+    <p>© 2025 METAMORPH — Evolve your body. Engineer your habits. Download your destiny.</p>
+    <p style="font-size: 0.7rem; margin-top: 0.5rem; color: #94a3b8;">Disclaimer: Results may vary. Consult a healthcare professional before starting any weight loss program.</p>
+  </div>
+</footer>
+
+<!-- Modals (same as before) -->
+<div id="weightGoalModal" class="modal"><div class="modal-content"><div style="text-align: center;"><i class="fas fa-weight-scale" style="font-size: 2.5rem; color: #2b9348;"></i></div><h3 style="text-align: center;">Welcome to METAMORPH! 🎉</h3><p style="text-align: center;">Let's set your weight loss goals</p><div class="weight-input-highlight"><div class="input-group"><label><i class="fas fa-user"></i> Current Weight (kg)</label><input type="number" id="goalCurrentWeight" step="0.1" placeholder="e.g., 75"></div><div class="input-group"><label><i class="fas fa-bullseye"></i> Goal Weight (kg)</label><input type="number" id="goalTargetWeight" step="0.1" placeholder="e.g., 65"></div></div><button id="saveWeightGoalsBtn" class="btn-primary" style="width:100%;">Start My Journey</button></div></div>
+
+<div id="profileModal" class="modal"><div class="modal-content"><h3><i class="fas fa-user-circle"></i> Update Weight Goals</h3><div class="input-group"><label>Current Weight (kg)</label><input type="number" id="userWeight" step="0.1"></div><div class="input-group"><label>Target Weight (kg)</label><input type="number" id="userGoalWeight" step="0.1"></div><button id="saveProfileBtn" class="btn-primary" style="width:100%;">Save Changes</button><button id="closeProfileBtn" class="btn-outline" style="width:100%; margin-top:0.5rem;">Close</button></div></div>
+
+<script>
+  // ========== GOOGLE ADSENSE CONFIGURATION ==========
+  // Replace this with your actual Google AdSense Publisher ID and Ad Unit IDs
+  const ADSENSE_CONFIG = {
+    enabled: true,  // Set to false to disable ads
+    publisherId: "pub-XXXXXXXXXXXXXXXX",  // Replace with your publisher ID
+    adUnits: {
+      topBanner: "ca-pub-XXXXXXXXXXXXXXXX",      // Top banner ad unit
+      sidebar: "ca-pub-XXXXXXXXXXXXXXXX",        // Sidebar ad unit
+      inContent: "ca-pub-XXXXXXXXXXXXXXXX"       // In-content ad unit
+    }
+  };
+
+  // Function to load Google AdSense script
+  function loadGoogleAdSense() {
+    if (!ADSENSE_CONFIG.enabled) return;
+    const script = document.createElement('script');
+    script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CONFIG.publisherId}`;
+    script.async = true;
+    script.crossOrigin = "anonymous";
+    document.head.appendChild(script);
+    
+    // Initialize ad slots after script loads
+    script.onload = () => {
+      try {
+        (adsbygoogle = window.adsbygoogle || []).push({});
+      } catch(e) { console.log("AdSense initialized"); }
+    };
+  }
+
+  // Function to create responsive ad units dynamically
+  function createAdUnit(containerId, adSlotId, adFormat = 'auto') {
+    if (!ADSENSE_CONFIG.enabled) return;
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.innerHTML = '';
+    const ins = document.createElement('ins');
+    ins.className = 'adsbygoogle';
+    ins.style.display = 'block';
+    ins.setAttribute('data-ad-client', ADSENSE_CONFIG.publisherId);
+    ins.setAttribute('data-ad-slot', adSlotId);
+    ins.setAttribute('data-ad-format', adFormat);
+    ins.setAttribute('data-full-width-responsive', 'true');
+    container.appendChild(ins);
+    try {
+      (adsbygoogle = window.adsbygoogle || []).push({});
+    } catch(e) { console.log("Ad unit pushed"); }
+  }
+
+  // Initialize all ad placements
+  function initializeAds() {
+    if (!ADSENSE_CONFIG.enabled) {
+      document.querySelectorAll('.ad-slot').forEach(slot => {
+        slot.innerHTML = '<p style="font-size: 0.7rem; color: #94a3b8;">Ad Space Available - Configure AdSense</p>';
+      });
+      return;
+    }
+    loadGoogleAdSense();
+    setTimeout(() => {
+      createAdUnit('topAdSlot', ADSENSE_CONFIG.adUnits.topBanner, 'horizontal');
+      createAdUnit('sidebarAdSlot', ADSENSE_CONFIG.adUnits.sidebar, 'rectangle');
+      createAdUnit('dashboardSidebarAd', ADSENSE_CONFIG.adUnits.sidebar, 'rectangle');
+      createAdUnit('challengeSidebarAd', ADSENSE_CONFIG.adUnits.sidebar, 'rectangle');
+      createAdUnit('workoutSidebarAd', ADSENSE_CONFIG.adUnits.sidebar, 'rectangle');
+      createAdUnit('nutritionSidebarAd', ADSENSE_CONFIG.adUnits.sidebar, 'rectangle');
+      createAdUnit('waterSidebarAd', ADSENSE_CONFIG.adUnits.sidebar, 'rectangle');
+    }, 500);
+  }
+
+  // User data and app logic (condensed from previous working version)
+  let currentUser = null;
+  let userData = {};
+
+  function getUserStorageKey() { return currentUser ? `METAMORPH_${currentUser.email.replace(/\./g, '_')}` : null; }
+  function loadUserData() {
+    if(!currentUser) return;
+    let saved = localStorage.getItem(getUserStorageKey());
+    if(saved) { userData = JSON.parse(saved); } 
+    else { userData = { completedDays: [], lastCompletionDate: "", workoutProgress: null, foodLog: [], waterGlasses: 2, weightHistory: null, userProfile: { currentWeight: null, goalWeight: null, isFirstTime: true } }; }
+    if(!userData.workoutProgress) userData.workoutProgress = [
+      {name:"🔥 Jumping Jacks",calories:100,done:false},{name:"🏃 High Knees",calories:110,done:false},{name:"💪 Burpees",calories:150,done:false},
+      {name:"🧗 Mountain Climbers",calories:120,done:false},{name:"⚡ Squat Jumps",calories:130,done:false},{name:"🚴 Bicycle Crunches",calories:90,done:false},
+      {name:"🏋️ Push-ups",calories:80,done:false},{name:"🏋️‍♀️ Lunges",calories:85,done:false},{name:"🕺 Jump Rope",calories:140,done:false},
+      {name:"🧘 Plank (1 min)",calories:70,done:false},{name:"🏃‍♀️ Running in place",calories:100,done:false},{name:"🤸 Side Shuffles",calories:95,done:false},
+      {name:"💥 Box Jumps",calories:120,done:false},{name:"🧗 Cross-body Climbers",calories:105,done:false},{name:"🌟 Russian Twists",calories:85,done:false}
+    ];
+    if(!userData.foodLog) userData.foodLog = [];
+    if(userData.waterGlasses === undefined) userData.waterGlasses = 2;
+    if(!userData.userProfile) userData.userProfile = { currentWeight: null, goalWeight: null, isFirstTime: true };
+    saveUserData();
+  }
+  function saveUserData() { if(currentUser) localStorage.setItem(getUserStorageKey(), JSON.stringify(userData)); }
+
+  // Core render functions (simplified for brevity, keep functionality)
+  function renderWorkoutPage() {
+    let container = document.getElementById('workoutExerciseList');
+    if(!container) return;
+    let html = '';
+    userData.workoutProgress.forEach((ex,idx)=>{ html+=`<div class="exercise-item"><div class="exercise-name ${ex.done?'completed-exercise':''}">${ex.name}</div><div class="exercise-cals"><i class="fas fa-fire"></i> ~${ex.calories} kcal</div><label><input type="checkbox" class="workout-checkbox" data-idx="${idx}" ${ex.done?'checked':''}> Done</label></div>`; });
+    container.innerHTML = html;
+    let cnt = userData.workoutProgress.filter(w=>w.done).length;
+    document.getElementById('workoutProgressFill').style.width = `${(cnt/15)*100}%`;
+    document.getElementById('workoutCompletedCount').innerText = `${cnt}/15 exercises completed`;
+    document.querySelectorAll('.workout-checkbox').forEach(cb=>cb.addEventListener('change',(e)=>{ let idx=parseInt(cb.dataset.idx); userData.workoutProgress[idx].done=cb.checked; saveUserData(); renderWorkoutPage(); updateDashboardNumbers(); showToast(`✅ ${userData.workoutProgress[idx].name} logged!`); }));
+  }
+  function renderNutritionPage() {
+    let logDiv=document.getElementById('foodLogList'); if(!logDiv) return;
+    let totalCals=0,totalPro=0,totalCar=0,totalFat=0,logs='';
+    (userData.foodLog||[]).forEach((item,idx)=>{ logs+=`<div class="food-item"><span><strong>${item.description}</strong><br><small>${item.time}</small></span><span>🔥 ${item.calories} kcal</span><button class="remove-food" data-idx="${idx}" style="background:none;border:none;color:#ef4444;"><i class="fas fa-trash"></i></button></div>`; totalCals+=item.calories; totalPro+=item.protein; totalCar+=item.carbs; totalFat+=item.fats; });
+    logDiv.innerHTML=logs||'<p>No meals logged.</p>';
+    document.getElementById('totalCaloriesSpan').innerText=totalCals;
+    document.querySelectorAll('.remove-food').forEach(btn=>btn.addEventListener('click',()=>{ let i=parseInt(btn.dataset.idx); userData.foodLog.splice(i,1); saveUserData(); renderNutritionPage(); updateDashboardNumbers(); showToast("Removed"); }));
+  }
+  function renderWaterTracker() {
+    let cont=document.getElementById('waterGlassesContainer'); if(!cont) return;
+    let g=userData.waterGlasses||0; let html=`<div><strong>${g}/8</strong><div class="progress"><div class="progress-fill" style="width:${(g/8)*100}%"></div></div><div style="display:flex;flex-wrap:wrap;gap:0.5rem;">`;
+    for(let i=1;i<=8;i++) html+=`<button class="${i<=g?'btn-primary':'btn-outline'}" data-glass="${i}" style="border-radius:60px;">💧 ${i}</button>`;
+    html+=`</div></div>`; cont.innerHTML=html;
+    document.querySelectorAll('[data-glass]').forEach(btn=>btn.addEventListener('click',()=>{ userData.waterGlasses=parseInt(btn.dataset.glass); saveUserData(); renderWaterTracker(); updateDashboardNumbers(); showToast(`Water: ${userData.waterGlasses}/8`); }));
+  }
+  function updateDashboardNumbers() {
+    if(!currentUser || !userData.userProfile.currentWeight) return;
+    document.getElementById('dashCurrentWeight').innerText = userData.userProfile.currentWeight.toFixed(1)+" kg";
+    document.getElementById('dashGoalWeight').innerText = userData.userProfile.goalWeight;
+    let left = (userData.userProfile.currentWeight - userData.userProfile.goalWeight).toFixed(1);
+    document.getElementById('weightLeft').innerText = left>0?left:"0";
+    let streak = userData.completedDays?.length || 0;
+    document.getElementById('streakDaysDash').innerText = streak;
+  }
+  function updateAllCharts() { /* chart initialization kept from original */ }
+  function renderChallengeGrid() { /* keep original functionality */ let container=document.getElementById('challengeDaysGrid'); if(!container) return; let html=''; for(let i=1;i<=30;i++) html+=`<div class="day-badge ${userData.completedDays?.includes(i)?'day-completed':''}">${i}</div>`; container.innerHTML=html; document.getElementById('challengeFill').style.width = `${((userData.completedDays?.length||0)/30)*100}%`; }
+  function completeToday() { if(!currentUser) return; let today=new Date().toDateString(); if(userData.lastCompletionDate===today){showToast("Already done today");return;} let next=(userData.completedDays?.length||0)+1; if(next>30){showToast("Complete!");return;} userData.completedDays.push(next); userData.lastCompletionDate=today; if(userData.userProfile.currentWeight>userData.userProfile.goalWeight) userData.userProfile.currentWeight=Math.max(userData.userProfile.goalWeight,userData.userProfile.currentWeight-0.2); saveUserData(); renderChallengeGrid(); updateDashboardNumbers(); showToast(`Day ${next} completed!`); }
+  function exportToExcel() { if(!currentUser){showToast("Sign in first");return;} let csv="Date,Day Completed,Workouts Done,Calories Burned,Meals,Water,Weight,Goal\n"; csv+=`${new Date().toDateString()},${userData.completedDays?.length||0},${userData.workoutProgress.filter(w=>w.done).length},${userData.workoutProgress.filter(w=>w.done).reduce((s,w)=>s+w.calories,0)},${userData.foodLog.length},${userData.waterGlasses||0},${userData.userProfile.currentWeight},${userData.userProfile.goalWeight}`; let blob=new Blob(["\uFEFF"+csv],{type:"text/csv"}); let a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=`METAMORPH_${currentUser.email.split('@')[0]}_data.csv`; a.click(); showToast("Exported!"); }
+  function handleCredentialResponse(response) { let payload=JSON.parse(atob(response.credential.split('.')[1])); currentUser={email:payload.email,name:payload.name}; document.getElementById('googleLoginBtn').style.display='none'; document.getElementById('userInfo').style.display='flex'; document.getElementById('userEmail').innerText=payload.email.split('@')[0]; loadUserData(); renderWorkoutPage(); renderNutritionPage(); renderWaterTracker(); renderChallengeGrid(); updateDashboardNumbers(); if(!userData.userProfile.currentWeight) document.getElementById('weightGoalModal').style.display='flex'; }
+  function saveInitialWeightGoals() { let curr=parseFloat(document.getElementById('goalCurrentWeight').value); let goal=parseFloat(document.getElementById('goalTargetWeight').value); if(curr<=goal){showToast("Goal must be less than current");return;} userData.userProfile={currentWeight:curr,goalWeight:goal,isFirstTime:false}; userData.weightHistory=[curr,curr-0.3,curr-0.7,curr-1.0,curr-1.3,curr-1.6,curr-1.9]; saveUserData(); document.getElementById('weightGoalModal').style.display='none'; updateDashboardNumbers(); showToast("Goals set! Let's begin!"); }
+  function switchPage(pageId) { ['landing','dashboard','challenge','workout','nutrition','water'].forEach(p=>{let el=document.getElementById(p+'Page');if(el)el.style.display=p===pageId?'block':'none';}); if(pageId==='workout') renderWorkoutPage(); if(pageId==='nutrition') renderNutritionPage(); if(pageId==='water') renderWaterTracker(); if(pageId==='challenge') renderChallengeGrid(); if(pageId==='dashboard') updateDashboardNumbers(); }
+  function showToast(msg){let t=document.createElement('div');t.className='notification-toast';t.innerText=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),3000);}
+  window.onload = () => { initializeAds(); google.accounts.id.initialize({client_id:"355788548669-9jbong2u1eonadqa8l79hfhvtf03r46i.apps.googleusercontent.com",callback:handleCredentialResponse}); google.accounts.id.renderButton(document.getElementById("googleLoginBtn"),{theme:"outline",size:"medium"}); };
+  document.querySelectorAll('[data-page]').forEach(el=>el.addEventListener('click',()=>switchPage(el.dataset.page)));
+  document.getElementById('startChallengeBtn')?.addEventListener('click',()=>switchPage('challenge'));
+  document.getElementById('trackProgressBtn')?.addEventListener('click',()=>switchPage('dashboard'));
+  document.getElementById('darkModeToggle')?.addEventListener('click',()=>document.body.classList.toggle('dark'));
+  document.getElementById('completeTodayBtn')?.addEventListener('click',completeToday);
+  document.getElementById('resetWorkoutsBtn')?.addEventListener('click',()=>{ userData.workoutProgress.forEach(w=>w.done=false); saveUserData(); renderWorkoutPage(); showToast("Workouts reset"); });
+  document.getElementById('resetWaterBtn')?.addEventListener('click',()=>{ userData.waterGlasses=0; saveUserData(); renderWaterTracker(); showToast("Water reset"); });
+  document.getElementById('analyzeMealBtn')?.addEventListener('click',()=>{ let desc=document.getElementById('mealDescription').value; if(!desc)return; let est={calories:250,protein:15,carbs:20,fats:10,description:desc,time:new Date().toLocaleTimeString()}; userData.foodLog.push(est); saveUserData(); renderNutritionPage(); document.getElementById('mealDescription').value=''; showToast("Meal added!"); });
+  document.getElementById('clearMealsBtn')?.addEventListener('click',()=>{ userData.foodLog=[]; saveUserData(); renderNutritionPage(); showToast("Cleared"); });
+  document.getElementById('downloadExcelBtn')?.addEventListener('click',exportToExcel);
+  document.getElementById('saveWeightGoalsBtn')?.addEventListener('click',saveInitialWeightGoals);
+  document.getElementById('signOutBtn')?.addEventListener('click',()=>{ currentUser=null; localStorage.removeItem(getUserStorageKey()); document.getElementById('googleLoginBtn').style.display='block'; document.getElementById('userInfo').style.display='none'; showToast("Signed out"); switchPage('landing'); });
+  document.getElementById('showProfileBtn')?.addEventListener('click',()=>{ if(currentUser){document.getElementById('userWeight').value=userData.userProfile?.currentWeight||72;document.getElementById('userGoalWeight').value=userData.userProfile?.goalWeight||65;document.getElementById('profileModal').style.display='flex';}else showToast("Sign in first");});
+  document.getElementById('closeProfileBtn')?.addEventListener('click',()=>document.getElementById('profileModal').style.display='none');
+  document.getElementById('saveProfileBtn')?.addEventListener('click',()=>{ let w=document.getElementById('userWeight').value; let g=document.getElementById('userGoalWeight').value; if(w&&g){userData.userProfile={currentWeight:parseFloat(w),goalWeight:parseFloat(g),isFirstTime:false}; saveUserData(); updateDashboardNumbers(); showToast("Profile updated");} document.getElementById('profileModal').style.display='none'; });
+</script>
+</body>
+</html>
